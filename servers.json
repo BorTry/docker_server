@@ -1,0 +1,77 @@
+{
+    "server_names": [
+        "Minecraft",
+        "Modded Minecraft",
+        "Factorio",
+        "Factorio Space Age",
+        "Satisfactory",
+        "Space Engineers",
+        "Astroneers",
+        "Screeps"
+    ],
+    "launch_alternatives": {
+        "Minecraft": [
+            {
+                "type": "select",
+                "name": "Gamemode",
+                "values": [
+                    "Survival",
+                    "Creative"
+                ]
+            },
+            {
+                "type": "select",
+                "name": "World Select",
+                "values": [
+                    "World-1",
+                    "Test World"
+                ]
+            }
+        ],
+        "Modded Minecraft": [
+            {
+                "type": "select",
+                "name": "Gamemode",
+                "values": [
+                    "Survival",
+                    "Creative"
+                ]
+            },
+            {
+                "type": "select",
+                "name": "World Select",
+                "values": [
+                    "World-1",
+                    "Test World"
+                ]
+            },
+            {
+                "type": "select",
+                "name": "Mod pack",
+                "values": [
+                    "ATM 11"
+                ]
+            }
+        ]
+    },
+    "container_to_server_names": {
+        "minecraft": "Minecraft",
+        "minecraft_modded": "Modded Minecraft",
+        "space_engineers": "Space Engineers",
+        "factorio": "Factorio",
+        "factorio_space_age": "Factorio Space Age",
+        "screeps": "Screeps",
+        "satisfactory": "Satisfactory",
+        "astroneers": "Astroneers"
+    },
+    "server_names_to_container": {
+        "Minecraft": "minecraft",
+        "Modded Minecraft": "minecraft_modded",
+        "Space Engineers": "space_engineers",
+        "Factorio": "factorio",
+        "Factorio Space Age": "factorio_space_age",
+        "Screeps": "screeps",
+        "Satisfactory": "satisfactory",
+        "Astroneers": "astroneers"
+    }
+}

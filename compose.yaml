@@ -1,0 +1,94 @@
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Docker Compose reference guide at
+# https://docs.docker.com/go/compose-spec-reference/
+
+# Here the instructions define your application as a service called "server".
+# This service is built from the Dockerfile in the current directory.
+# You can add other services your application may depend on here, such as a
+# database or a cache. For examples, see the Awesome Compose repository:
+# https://github.com/docker/awesome-compose
+services:
+  minecraft:
+    ports:
+      - "25565:80"
+    volumes: ["../mine_server:/data"]
+    working_dir: /data
+    build:
+      context: ./buildfiles
+      dockerfile: Dockerfile.java
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+          cpus: "6.0"
+    tty: true
+    command: "java -Xmx6G -jar fabric-server-mc.1.21.11-loader.0.18.4-launcher.1.1.1.jar nogui"
+
+  minecraft_modded:
+    ports:
+      - "25566:80"
+    build:
+      context: ./buildfiles
+      dockerfile: Dockerfile.java
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+    tty: true
+
+  space_engineers:
+    build:
+      context: ./buildfiles
+      dockerfile: Dockerfile.java
+    tty: true
+
+  factorio:
+    build:
+      context: ./buildfiles
+      dockerfile: Dockerfile.java
+    tty: true
+
+  factorio_space_age:
+    build:
+      context: ./buildfiles
+      dockerfile: Dockerfile.java
+    tty: true
+
+  satisfactory:
+    build:
+      context: ./buildfiles
+      dockerfile: Dockerfile.java
+    tty: true
+      
+  astroneers:
+    build:
+      context: ./buildfiles
+      dockerfile: Dockerfile.java
+    tty: true
+
+  screeps:
+    build:
+      context: ./buildfiles
+      dockerfile: Dockerfile.java
+    tty: true
+
+  frontend:
+    volumes: ["./src/app:/app", "./src/lib:/app/lib", "./resources:/app/resources"]
+    working_dir: /app
+    networks:
+      - frontend
+    ports: 
+     - 5000:8043/tcp
+     - 2024:2024/udp
+    build:
+      context: ./buildfiles
+      dockerfile: Dockerfile.py
+    tty: true
+    command: "flask --app app run --host=0.0.0.0 --port=8043 &; ../bin/sh"
+
+volumes:
+  socket_connection:
+
+networks:
+  frontend:
+    driver: bridge
