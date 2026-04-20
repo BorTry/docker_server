@@ -1,0 +1,130 @@
+import docker
+
+CLIENT = docker.from_env()
+
+def docker_running():
+    try:
+        CLIENT.ping()
+        return True
+    except docker.errors.DockerException:
+        return False
+    
+def convert_container_name(container_name):
+    return container_name.replace("docker_server-", "").split("-")[0]
+
+def convert_server_name(server_name, server_json):
+    return f'docker_server-{server_json["server_names_to_container"][server_name]}-1'
+
+def get_container(container_name, all=False):
+    if (not CLIENT.containers.list(filters={"name":container_name}, all=all)):
+        print(f"container {container_name} does not exist")
+        return False
+    return CLIENT.containers.get(container_name)
+
+def get_container_count():
+    return len(CLIENT.containers.list(all=True))
+
+def get_container_count(all=False):
+    return len(CLIENT.containers.list(all=all))
+
+def get_container_names(all=False):
+    fin_arr = []
+    containers = CLIENT.containers.list(all=all)
+
+    # Filter out the names
+    for con in containers:
+        fin_arr.append(con.name)
+
+    return fin_arr
+
+def get_resource_use_for_containers(server_names:tuple[str], server_json):
+    fin_arr = []
+
+    for server_name in server_names:
+        stats = get_container_stats(server_name, server_json)
+        
+        if (not stats): continue
+        
+        fin_arr.append(
+            {
+                "name": server_name,
+                "ram": get_container_ramusage(stats),
+                "cpu": get_cpu_percentage(stats)
+            }
+        )
+
+    return fin_arr
+
+def get_container_stats(server_name, server_json):
+    container_name = convert_server_name(server_name, server_json)
+    container = get_container(container_name)
+
+    if (not container): return False
+
+    stats = container.stats(stream=False)
+
+    if (not ("memory_stats" in stats) or not ("cpu_stats" in stats)): return False
+
+    return stats
+
+def get_cpu_percentage(stats):
+    # Calculate deltas between current and previous stats
+    cpu_delta = stats["cpu_stats"]["cpu_usage"]["total_usage"] - \
+                stats["precpu_stats"]["cpu_usage"]["total_usage"]
+    system_delta = stats["cpu_stats"]["system_cpu_usage"] - \
+                   stats["precpu_stats"]["system_cpu_usage"]
+    
+    # Get number of CPU cores to normalize percentage (for values > 100%)
+    online_cpus = stats["cpu_stats"].get("online_cpus", 
+                   len(stats["cpu_stats"]["cpu_usage"].get("percpu_usage", [])))
+    
+    if system_delta > 0.0 and cpu_delta > 0.0:
+        return round((cpu_delta / system_delta) * online_cpus * 100.0)
+    return 0.0
+
+def get_container_ramusage(stats):
+    mem_usage = stats["memory_stats"]["usage"]
+    # Subtract cache to get precise active memory (varies by cgroup version)
+    cache = stats["memory_stats"]["stats"].get("inactive_file", 0) 
+    used_memory = mem_usage - cache
+    limit = stats["memory_stats"]["limit"]
+
+    return round((used_memory / limit) * 100) # out of 100
+
+def filter_container_names(container_names, server_json:dict):
+    fin_arr = []
+    # Filters out the actual name of the containers, for predefined names / prettier names :)
+    for con_name in container_names:
+        cut_down_name = convert_container_name(con_name)
+
+        if not (cut_down_name in server_json["container_to_server_names"]):
+            continue
+
+        fin_arr.append(server_json["container_to_server_names"][cut_down_name])
+    return fin_arr
+
+def stop_frontend(): 
+    # check to see if the docker container exists at all
+    if (not len(CLIENT.containers.list(filters={"name": "docker_server-frontend-1"}))):
+        raise Exception("Front end container is not running")
+    
+    frontend = CLIENT.containers.get("docker_server-frontend-1")
+    frontend.stop()
+
+def stop_server(server_name, server_json):
+    container_name = convert_server_name(server_name, server_json)
+    container = get_container(container_name)
+
+    if (not container): return
+
+    container = CLIENT.containers.get(container_name)
+    container.stop()
+
+def start_server(server_name, server_json):
+    container_name = convert_server_name(server_name, server_json)
+    container = get_container(container_name, True)
+
+    if (not container): return
+
+    container = CLIENT.containers.get(container_name)
+    container.start()

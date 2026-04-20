@@ -1,0 +1,275 @@
+:root {
+    --main: #193948;
+    --secondary: #2c5c66;
+    --item-list: #dcdcdc4d;
+    
+    --gradient3: #d0bdf4;
+    --gradient4: #8458B3;
+    --gradient5: #a28089;
+
+    --body: #224d61;
+
+    --offline: #da3e44;
+    --online: rgb(53, 188, 62);
+    --waiting: rgb(218, 218, 68);
+}
+
+body {
+    font-family: "Verdana", Times, serif;
+    margin: 0px;
+    justify-items: center;
+    background: 
+        radial-gradient(
+            ellipse at top,
+            var(--secondary) 5%,
+            transparent
+        ),
+        var(--main);
+    background-size: cover;
+}
+
+.round-border {
+    border-radius: 8px
+}
+
+.full-size {
+    width: 100%;
+    height: 100%;
+}
+
+.title {
+    text-align: center;
+}
+
+.shadow {
+    box-shadow: 6px 5px 6px 4px rgba(34, 34, 34, 0.419);
+}
+
+.inset-shadow {
+    box-shadow: inset 0px 6px 7px 4px rgba(0, 0, 0, 0.25);
+}
+
+.center-content {
+    align-items: center;
+    justify-content: center;
+    padding-left: 27%;
+}
+
+/* =============== Main bodies =============== */
+
+.main-body {
+    width: 80%;
+    margin: 40px 40px 40px 40px;
+    border: 3px solid var(--body);
+    padding: 10px;
+    background-color: var(--body);
+    display: grid;
+    justify-items: center;
+}
+
+#header {
+    margin-top: 0px;
+    border-top: 0px;
+    border-radius: 0px 0px 4px 4px
+}
+
+#body {
+    background-color: transparent;
+    border: transparent;
+}
+
+#footer {
+}
+
+/* =============== Server list =============== */
+
+#server-list {
+    width: 95%;
+    margin: 30px;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: auto;
+    gap: 30px
+}
+
+.server-item {
+    width: 100%;
+    height: 350px;
+    background-color: none;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    display: grid;
+    padding-bottom: .7rem;
+}
+
+.server-item:hover .server-item-image {
+    width: 100%;
+    transition: 1s;
+}
+
+.server-item:not(:hover) .server-item-image {
+    width: 198%; /* should be 198% */
+    transition: 1s;
+}
+
+.server-item-image {
+    height: inherit;
+    object-fit: cover;
+    z-index: 10;
+    border-radius: 8px 0px 0px 8px;
+    border: .4rem solid;
+    border-color: var(--offline);
+}
+
+.server-item-hidden {
+    color: white;
+    z-index: 1;
+    justify-items: left;
+    background:
+        radial-gradient(
+            at top right,
+            var(--item-list), transparent
+        ),
+        var(--main);
+}
+
+.server-item-info {
+    color: rgb(215, 215, 215);
+    justify-items: left;
+    background:
+        radial-gradient(
+            at top left,
+            var(--item-list), transparent
+        ),
+        var(--main);
+    border-radius: 0px 8px 8px 0px;
+}
+
+.server-info-container {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1.5fr;
+    grid-template-columns: 1fr;
+}
+
+/* =============== Server form =============== */
+
+.server-form {
+    align-items: center;
+    justify-content: center;
+    display: grid;
+    grid-template-rows: .8fr .2fr;
+    grid-template-columns: 1fr;
+}
+
+.server-form-container {
+    display: grid;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    grid-template-rows: repeat(3, 1fr);
+    grid-template-columns: repeat(1, .8fr);
+    gap: 1rem;
+}
+
+.server-form :is(button, select, option) {
+    color: whitesmoke;
+    background: var(--main);
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    border: 0px;
+    height: 100%;
+}
+
+.server-form label {
+    font-size: 1.4rem;
+}
+
+.server-form-container div {
+    align-items: center;
+    justify-content: center;
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr;
+}
+
+.button-container {
+    grid-row-start: 2;
+    justify-content: center;
+    display: flex;
+}
+
+.button-container button {
+    width: 50%;
+    padding: 0.5rem 0.8rem;
+    margin-top: 0px;
+}
+
+/* =============== Server form =============== */
+
+.gauge-list {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    display: flex;
+    gap: 10px;
+}
+
+.gauge-container {
+    height: 60px;
+    width: 120px;
+    padding: 10px;
+    margin: 10px;
+    padding-bottom: 0px;
+    overflow: hidden;
+    position: relative;
+}
+
+.gauge {
+    position: absolute;
+    height: 60px;
+    width: 120px;
+    z-index: 2;
+    background: 
+    linear-gradient(
+        to left,
+        green, yellow, red
+        );
+    border-radius: 120px 120px 0px 0px;
+    transition: all 1.3s ease-in-out;
+    rotate: 180deg;
+    transform-origin: bottom;
+}
+
+.gauge-border {
+    z-index: 1;
+    height: 70px;
+    width: 130px;
+    transform: translate(-5px, -5px);
+    border-radius: 132px 132px 0px 0px;
+    background-color: gray;
+}
+
+.gauge-foreground {
+    position: absolute;
+    z-index: 2;
+    transform: translate(20px, 20px);
+    background:
+        radial-gradient(
+            at top left,
+            var(--item-list), transparent
+        ),
+        var(--main);
+    box-shadow: 0px 0px 7px 4px rgba(34, 34, 34, 0.419);
+    height: 40px;
+    width: 80px;
+    border-radius: 120px 120px 0px 0px;
+}
+
+.gauge-background {
+    z-index: 3;
+    position: absolute;
+    transform: translate(-10px, 59px);
+    height: 2px;
+    width: 140px;
+    background-color: gray;
+}
