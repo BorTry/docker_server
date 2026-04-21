@@ -2,8 +2,13 @@
 Handles requests from the front end server. ensures that there is enough space for the request to be completed.
 Serves the front end with information needed to run.
 """
-from .lib.init import start
-start()
+
+# TODO: Split the main thread into two thread
+# one handles requests from the frontend server
+# the other handles everything about the containers
+# between them is a pipe for data transfer
+
+import lib.init
 
 from time import sleep
 from ..lib.communication import communication

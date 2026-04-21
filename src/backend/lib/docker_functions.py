@@ -1,6 +1,11 @@
+from json import load
 import docker
 
 CLIENT = docker.from_env()
+SERVER_JSON = None
+
+with open("./servers.json", "r") as file:
+    SERVER_JSON = load(file)
 
 def docker_running():
     try:
@@ -12,8 +17,8 @@ def docker_running():
 def convert_container_name(container_name):
     return container_name.replace("docker_server-", "").split("-")[0]
 
-def convert_server_name(server_name, server_json):
-    return f'docker_server-{server_json["server_names_to_container"][server_name]}-1'
+def convert_server_name(server_name):
+    return f'docker_server-{SERVER_JSON["server_names_to_container"][server_name]}-1'
 
 def get_container(container_name, all=False):
     if (not CLIENT.containers.list(filters={"name":container_name}, all=all)):
@@ -37,11 +42,11 @@ def get_container_names(all=False):
 
     return fin_arr
 
-def get_resource_use_for_containers(server_names:tuple[str], server_json):
+def get_resource_use_for_containers(server_names:tuple[str]):
     fin_arr = []
 
     for server_name in server_names:
-        stats = get_container_stats(server_name, server_json)
+        stats = get_container_stats(server_name)
         
         if (not stats): continue
         
@@ -55,8 +60,8 @@ def get_resource_use_for_containers(server_names:tuple[str], server_json):
 
     return fin_arr
 
-def get_container_stats(server_name, server_json):
-    container_name = convert_server_name(server_name, server_json)
+def get_container_stats(server_name):
+    container_name = convert_server_name(server_name)
     container = get_container(container_name)
 
     if (not container): return False
@@ -91,16 +96,16 @@ def get_container_ramusage(stats):
 
     return round((used_memory / limit) * 100) # out of 100
 
-def filter_container_names(container_names, server_json:dict):
+def filter_container_names(container_names):
     fin_arr = []
     # Filters out the actual name of the containers, for predefined names / prettier names :)
     for con_name in container_names:
         cut_down_name = convert_container_name(con_name)
 
-        if not (cut_down_name in server_json["container_to_server_names"]):
+        if not (cut_down_name in SERVER_JSON["container_to_server_names"]):
             continue
 
-        fin_arr.append(server_json["container_to_server_names"][cut_down_name])
+        fin_arr.append(SERVER_JSON["container_to_server_names"][cut_down_name])
     return fin_arr
 
 def stop_frontend(): 
@@ -111,8 +116,8 @@ def stop_frontend():
     frontend = CLIENT.containers.get("docker_server-frontend-1")
     frontend.stop()
 
-def stop_server(server_name, server_json):
-    container_name = convert_server_name(server_name, server_json)
+def stop_server(server_name):
+    container_name = convert_server_name(server_name)
     container = get_container(container_name)
 
     if (not container): return
@@ -120,8 +125,8 @@ def stop_server(server_name, server_json):
     container = CLIENT.containers.get(container_name)
     container.stop()
 
-def start_server(server_name, server_json):
-    container_name = convert_server_name(server_name, server_json)
+def start_server(server_name):
+    container_name = convert_server_name(server_name)
     container = get_container(container_name, True)
 
     if (not container): return

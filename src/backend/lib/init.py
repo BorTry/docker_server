@@ -4,18 +4,16 @@ from json import load, dumps
 import docker
 from platform import system
 import os
-from ..lib.docker_functions import docker_running
+from src.backend.lib.docker_functions import docker_running
 
 CLIENT = docker.from_env()
-ADDRESS = ("0.0.0.0", 2024)
 CONFIG_FILE_PATH = os.path.abspath("./resources/config.json")
-
-print(CONFIG_FILE_PATH)
+SERVER_JSON_FILE_PATH = "./servers.json"
 
 # initialize the reverse container name to server name
 def initialize_servers_json():
     json_servers = {}
-    with open("./servers.json", "r") as file:
+    with open(SERVER_JSON_FILE_PATH, "r") as file:
         json_servers = load(file)
 
     container_names_json = json_servers["container_to_server_names"]
@@ -24,7 +22,7 @@ def initialize_servers_json():
     for container_name, server_name in container_names_json.items():
         json_servers["server_names_to_container"][server_name] = container_name
 
-    with open("./servers.json", "w") as file:
+    with open(SERVER_JSON_FILE_PATH, "w") as file:
         file.write(dumps(json_servers, indent=4))
 
 def fill_config():
@@ -55,4 +53,6 @@ def start():
     
     initialize_servers_json()
     fill_config()
-    start_frontend()
+    #start_frontend()
+
+start()
