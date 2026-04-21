@@ -49,6 +49,7 @@ def process_data(data:dict):
     match data["code"]:
         case Server_codes.SERVER_COUNT:
             return get_container_count()
+
         case Server_codes.RUNNING_SERVERS:
             # find the resource use for each container
             all_containers = filter_container_names(get_container_names(), SERVER_JSON)
@@ -64,7 +65,7 @@ def process_data(data:dict):
         case Server_codes.START_SERVER:
             start_server(data["data"], SERVER_JSON)
 
-        case Server_codes.GET_USAGE:
+        case Server_codes.GET_SERVER_USAGE:
             get_container_ramusage(data["data"], SERVER_JSON)
 
 def extract_data(response:str):

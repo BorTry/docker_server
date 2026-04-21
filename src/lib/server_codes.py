@@ -1,9 +1,10 @@
 class Server_codes:
     ENGINE_NOT_RUNNING = -1
+
     SERVER_COUNT = 0
     RUNNING_SERVERS = 1
     ALL_SERVERS = 2
-    GET_USAGE = 3
 
     START_SERVER = 10
     STOP_SERVER = 11
+    GET_SERVER_USAGE = 12

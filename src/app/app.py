@@ -20,6 +20,7 @@ except ImportError as e:
     print("app is not running in container")
     IS_IN_CONTAINER = False
 
+ALL_SERVERS = sock_thread.send_recv(Server_codes.ALL_SERVERS)
 
 # ======================= Server code =======================
 
@@ -27,7 +28,6 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    print(request.access_route)
     return render_template("index.html")
 
 @app.route("/backend/server_count", methods=["GET"])
@@ -40,8 +40,7 @@ def backend_servercount():
 @app.route("/backend/all_servers", methods=["GET"])
 def backend_allservers():
     if (IS_IN_CONTAINER):
-        data = sock_thread.send_recv(Server_codes.ALL_SERVERS)
-        return jsonify(message=data), 200
+        return jsonify(message=ALL_SERVERS), 200
     return jsonify(message=None), 404
 
 @app.route("/backend/all_running_servers", methods=["GET"])

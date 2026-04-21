@@ -1,4 +1,4 @@
-function create_gauge(gauge_id) {
+function create_gauge(gauge_id, text) {
     let container = document.createElement("div")
     container.id = `${gauge_id}-container`
     container.className = "gauge-container"
@@ -12,6 +12,8 @@ function create_gauge(gauge_id) {
 
     let gauge_foreground = document.createElement("div")
     gauge_foreground.className = "gauge-foreground"
+
+    gauge_foreground.innerText = text
 
     let gauge_border = document.createElement("div")
     gauge_border.className = "gauge-border inset-shadow"

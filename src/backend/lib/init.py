@@ -53,6 +53,6 @@ def start():
     
     initialize_servers_json()
     fill_config()
-    #start_frontend()
+    start_frontend()
 
 start()

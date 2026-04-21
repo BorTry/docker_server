@@ -2,6 +2,31 @@
 Run function for the docker thread
 """
 from src.lib.ez_thread import ez_thread
+from src.lib.server_codes import Server_codes
+from src.backend.lib.docker_functions import *
 
-def docker_func(ez_thread:ez_thread):
-    pass
+CONTAINERS = [None] * 10
+
+# running servers
+def docker_func(thread:ez_thread):
+    all_containers = filter_container_names(get_container_names())
+    resources_used = get_resource_use_for_containers(all_containers)
+
+    CONTAINERS[Server_codes.RUNNING_SERVERS] = resources_used
+
+    thread.send(CONTAINERS)
+    
+    thread.print("Running")
+
+    data_packet = thread.recv()
+
+    if (not data_packet): return
+    # use the data to try to start up a server
+    start_server(data_packet["data"])
+
+# send over data to the com thread
+def docker_init(thread:ez_thread):
+    CONTAINERS[Server_codes.ALL_SERVERS] = {
+        "servers": SERVER_JSON["server_names"],
+        "launch_options": SERVER_JSON["launch_alternatives"]
+    }

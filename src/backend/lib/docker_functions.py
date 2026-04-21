@@ -24,10 +24,8 @@ def get_container(container_name, all=False):
     if (not CLIENT.containers.list(filters={"name":container_name}, all=all)):
         print(f"container {container_name} does not exist")
         return False
-    return CLIENT.containers.get(container_name)
 
-def get_container_count():
-    return len(CLIENT.containers.list(all=True))
+    return CLIENT.containers.get(container_name)
 
 def get_container_count(all=False):
     return len(CLIENT.containers.list(all=all))
@@ -41,6 +39,20 @@ def get_container_names(all=False):
         fin_arr.append(con.name)
 
     return fin_arr
+
+def filter_container_names(container_names):
+    fin_arr = []
+    # Filters out the actual name of the containers, for predefined names / prettier names :)
+    for con_name in container_names:
+        cut_down_name = convert_container_name(con_name)
+
+        if not (cut_down_name in SERVER_JSON["container_to_server_names"]):
+            continue
+
+        fin_arr.append(SERVER_JSON["container_to_server_names"][cut_down_name])
+    return fin_arr
+
+# ============================ Container stats ============================
 
 def get_resource_use_for_containers(server_names:tuple[str]):
     fin_arr = []
@@ -96,17 +108,7 @@ def get_container_ramusage(stats):
 
     return round((used_memory / limit) * 100) # out of 100
 
-def filter_container_names(container_names):
-    fin_arr = []
-    # Filters out the actual name of the containers, for predefined names / prettier names :)
-    for con_name in container_names:
-        cut_down_name = convert_container_name(con_name)
-
-        if not (cut_down_name in SERVER_JSON["container_to_server_names"]):
-            continue
-
-        fin_arr.append(SERVER_JSON["container_to_server_names"][cut_down_name])
-    return fin_arr
+# ============================ Container manipulation ============================
 
 def stop_frontend(): 
     # check to see if the docker container exists at all

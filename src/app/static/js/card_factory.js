@@ -39,8 +39,8 @@ function create_information_page(parent, name) {
 
     let gauge_container = document.createElement("div")
     gauge_container.className = "gauge-list"
-    gauge_container.appendChild(create_gauge(`cpu-gauge-${name}`))
-    gauge_container.appendChild(create_gauge(`ram-gauge-${name}`))
+    gauge_container.appendChild(create_gauge(`cpu-gauge-${name}`, "Cpu"))
+    gauge_container.appendChild(create_gauge(`ram-gauge-${name}`, "Ram"))
 
     container.appendChild(gauge_container)
     parent.appendChild(container)

@@ -64,11 +64,7 @@ class communication:
 
         self.socket.settimeout(0.25)
 
-        def outer_wrap():
-            while not self.terminate.is_set():
-                self.thread_val = wrap(self, self.socket)
-
-        self.thread = Thread(target=outer_wrap, name=self.name)
+        self.thread = Thread(target=thread_wrapper(self), name=self.name)
         self.thread.start()
 
     def send(self, data:str, target:tuple[str, int]=None, code:int=200):
@@ -103,3 +99,10 @@ class communication:
         if self.thread and self.thread.is_alive():
             print(f"Waiting for {self.thread.name} to terminate")
             self.thread.join()
+
+def thread_wrapper(self:communication):
+    def wrap():
+        while not self.terminate.is_set():
+            self.thread_val = wrap(self, self.socket)
+
+    return wrap

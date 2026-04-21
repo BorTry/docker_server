@@ -1,37 +1,72 @@
-from threading import Lock, Event
+from threading import Event
 from multiprocessing import Pipe
+from time import sleep
+from runpy import run_path
 
 from src.lib.ez_thread import ez_thread
-from src.backend.lib.comm_thread import comm_func
-from src.backend.lib.docker_thread import docker_func
-from src.lib.server_codes import Server_codes
+from src.lib.sock_thread import sock_thread
+from src.backend.lib.comm_thread import comm_func, comm_init, socket_func
+from src.backend.lib.docker_thread import docker_func, docker_init
+from src.backend.lib.docker_functions import stop_frontend
 
-from runpy import run_path
 run_path("./src/backend/lib/init.py") # Init file
 
-thread_lock = Lock()
-thread_pipe = Pipe(duplex=True)
+thread_pipe_1, thread_pipe_2 = Pipe(duplex=True)
 thread_terminate_event = Event()
 
 COMMMUNICATION_THREAD = ez_thread(
     target=comm_func,
+    init=comm_init,
     terminate_signal=thread_terminate_event,
     name="comm_thread",
-    pipe=thread_pipe,
-    lock=thread_lock
-) # Talks to the frontend server
+    pipe=thread_pipe_1,
+) # Facilitates communication between the two threads
 
 DOCKER_THREAD = ez_thread(
     target=docker_func,
+    init=docker_init,
     terminate_signal=thread_terminate_event,
     name="docker_thread",
-    pipe=thread_pipe,
-    lock=thread_lock
+    pipe=thread_pipe_2,
+    sleep_time=1.0
 ) # Talks to the docker engine
 
+PORT = 2024
+ADDRESS = "0.0.0.0"
+
+SOCKET_THREAD = sock_thread(
+    target=socket_func,
+    address=(ADDRESS, PORT),
+    terminate_signal=thread_terminate_event,
+    name="socket_thread"
+) # Talks to the frontend
+
+# The docker thread must be started up first
 
 def main():
-    pass
+    DOCKER_THREAD.run()
+    COMMMUNICATION_THREAD.run()
+    SOCKET_THREAD.run()
+
+    while True:
+        try:
+            user_in = input("Select Action: \n")
+
+            if (user_in == "quit" or user_in == "q"):
+                break
+
+        except Exception as e:
+            print(e)
+
+    thread_terminate_event.set()
+
+    sleep(1)
+
+    stop_frontend()
+
+    DOCKER_THREAD.terminate()
+    COMMMUNICATION_THREAD.terminate()
+    SOCKET_THREAD.terminate()
 
 if __name__ == "__main__":
     main()

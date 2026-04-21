@@ -3,7 +3,7 @@ var RUNNING_SERVERS = []
 // set an interval to get server data
 setInterval(async function() {
     await change_live_servers()
-}, 4 * 1000)
+}, 3 * 1000)
 
 // find out which servers can be ran
 async function build_server_list() {
@@ -19,8 +19,6 @@ async function build_server_list() {
 
     // contains launch options for each server
     let all_servers = extract_data(data.message).data
-
-    console.log(JSON.stringify(all_servers))
 
     if (!all_servers.servers.length) {
         return
@@ -44,8 +42,6 @@ async function change_live_servers() {
     })
 
     let all_servers = extract_data(data.message).data
-
-    console.log(JSON.stringify(all_servers))
 
     if (!all_servers) return
 
@@ -119,7 +115,6 @@ function extract_data(response) {
 
 async function main() {
     await build_server_list()
-    await change_live_servers()
 }
 
 main()

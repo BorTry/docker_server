@@ -5,52 +5,45 @@ from time import sleep
 # Typing for very nice :)  
 from typing import Callable, Any
 from multiprocessing.connection import Connection
-from _thread import LockType
 
 class ez_thread:
-    def __init__(self, target:Callable=None, terminate_signal:Event=None, name="thread", pipe:Connection=None, lock:LockType=None, sleep_time:float=0.1):
+    def __init__(self, target:Callable=None, init:Callable=None, terminate_signal:Event=None, name="thread", pipe:Connection=None, sleep_time:float=0.1):
         self.name = name
         self.stdout = stdout
         self.sleep_time = sleep_time
 
         if not target:
             raise Exception("target function must be defined")
-        
+
         self.thread = Thread(target=thread_wrapper(self, target), name=name)
         self.terminate_signal = terminate_signal or Event()
 
-        if ((pipe and not lock) or (not pipe and lock)):
-            raise Exception("Pipe and lock must both be defined")
-        
         self.pipe = pipe
-        self.lock = lock
+
+        self.init = init
 
     def print(self, *msg:tuple[str]):
-        print(self.name, *msg, file=stdout)
+        print(self.name, "->", *msg, file=stdout)
 
-    def read_value(self):
-        val = None
+    def recv(self, timeout:bool=True):
+        if (timeout and not self.data_in_pipe()): return
 
-        with self.lock:
-            val = self.pipe.recv()
+        val = self.pipe.recv()
 
         return val
-    
-    def send_value(self, val:Any):
-        with self.lock:
-            self.pipe.send(val)
+
+    def send(self, val:Any):
+        if (self.pipe.closed): return
+
+        self.pipe.send(val)
 
     def data_in_pipe(self):
-
-        return self.pipe.poll()
+        return self.pipe.poll(timeout=0.5)
 
     def terminate(self):
         # Check if the pipe is still open
-        try:
-            self.pipe.send("hello")
+        if (self.pipe and not self.pipe.closed):
             self.pipe.close()
-        except BrokenPipeError:
-            pass
 
         # Close the thread and wait for it to finish
         if (not self.terminate_signal.is_set()):
@@ -61,6 +54,9 @@ class ez_thread:
             self.thread.join()
 
     def run(self):
+        if (self.init):
+            self.init(self)
+
         self.thread.start()
 
 def thread_wrapper(self:ez_thread, target:Callable):

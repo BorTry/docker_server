@@ -263,6 +263,8 @@ body {
     height: 40px;
     width: 80px;
     border-radius: 120px 120px 0px 0px;
+    text-align: center;
+    justify-items: end;
 }
 
 .gauge-background {
