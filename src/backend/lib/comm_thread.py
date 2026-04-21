@@ -28,10 +28,9 @@ def comm_func(thread:ez_thread):
         INCOMING_DATA = None
 
 def comm_init(thread:ez_thread):
-    global SERVER_DATA, DATA_LOCK
+    global SERVER_DATA
 
-    with DATA_LOCK:
-        SERVER_DATA = thread.recv(False) # Recieve the initial data from the backend
+    SERVER_DATA = thread.recv(False) # Recieve the initial data from the backend
 
 def socket_func(thread:sock_thread):
     global SERVER_DATA, DATA_LOCK, INCOMING_DATA

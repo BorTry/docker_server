@@ -1,30 +1,36 @@
 from flask import Flask, render_template, jsonify, request
 
+from src.lib.sock_thread import sock_thread
+from src.lib.server_codes import *
+from lib.socket_functions import socket_func, socket_init
+
 # ======================= Socket code =======================
 
 IS_IN_CONTAINER = True
 ADDRESS = "0.0.0.0"
+TARGET_ADDRESS = "host.docker.internal"
 PORT = 2024
 
-sock_thread = None
+SOCKET_THREAD = sock_thread(
+    target=socket_func,
+    init=socket_init,
+    address=(ADDRESS, PORT),
+    target_address=(TARGET_ADDRESS, PORT),
+    name="socket_thread",
+    sleeptime=2,
+)
 
+SOCKET_THREAD.run()
 
-try:
-    from lib.communication import communication
-    from lib.server_codes import *
-
-    sock_thread = communication((ADDRESS, PORT), "sock_thread", target_address=("host.docker.internal", PORT))
-
-except ImportError as e:
-    print(e)
-    print("app is not running in container")
-    IS_IN_CONTAINER = False
-
-ALL_SERVERS = sock_thread.send_recv(Server_codes.ALL_SERVERS)
+ALL_SERVERS = SOCKET_THREAD.return_val
+SOCKET_THREAD.return_val = None
 
 # ======================= Server code =======================
 
 app = Flask(__name__)
+
+def get_running_servers():
+    return SOCKET_THREAD.return_val
 
 @app.route("/")
 def index():
@@ -33,7 +39,7 @@ def index():
 @app.route("/backend/server_count", methods=["GET"])
 def backend_servercount():
     if (IS_IN_CONTAINER):
-        data = sock_thread.send_recv(Server_codes.SERVER_COUNT)
+        data = get_running_servers()
         return jsonify(message=data), 200
     return jsonify(message=None), 404
 
@@ -46,7 +52,7 @@ def backend_allservers():
 @app.route("/backend/all_running_servers", methods=["GET"])
 def backend_all_running_servers():
     if (IS_IN_CONTAINER):
-        data = sock_thread.send_recv(Server_codes.RUNNING_SERVERS)
+        data = get_running_servers()
         return jsonify(message=data), 200
     return jsonify(message=None), 404
 
@@ -55,6 +61,6 @@ def backend_all_running_servers():
 @app.route("/backend/start_up", methods=["POST"])
 def backend_start_up():
     if (IS_IN_CONTAINER):
-        sock_thread.send(request.form.get("name"), code=Server_codes.START_SERVER,)
+        SOCKET_THREAD.send(request.form.get("name"), code=Server_codes.START_SERVER)
         return jsonify(message=":)"), 200
     return jsonify(message=None), 404

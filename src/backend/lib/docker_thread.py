@@ -16,8 +16,6 @@ def docker_func(thread:ez_thread):
 
     thread.send(CONTAINERS)
     
-    thread.print("Running")
-
     data_packet = thread.recv()
 
     if (not data_packet): return

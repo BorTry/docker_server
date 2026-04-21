@@ -73,7 +73,7 @@ services:
     tty: true
 
   frontend:
-    volumes: ["./src/app:/app", "./src/lib:/app/lib", "./resources:/app/resources"]
+    volumes: ["./src/app:/app", "./src/lib:/app/src/lib", "./resources:/app/resources"]
     working_dir: /app
     networks:
       - frontend

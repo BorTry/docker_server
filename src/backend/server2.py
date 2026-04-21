@@ -7,7 +7,7 @@ from src.lib.ez_thread import ez_thread
 from src.lib.sock_thread import sock_thread
 from src.backend.lib.comm_thread import comm_func, comm_init, socket_func
 from src.backend.lib.docker_thread import docker_func, docker_init
-from src.backend.lib.docker_functions import stop_frontend
+from src.backend.lib.docker_functions import stop_frontend, start_frontend
 
 run_path("./src/backend/lib/init.py") # Init file
 
@@ -41,12 +41,14 @@ SOCKET_THREAD = sock_thread(
     name="socket_thread"
 ) # Talks to the frontend
 
-# The docker thread must be started up first
+# The docker thread must be started before the com thread
 
 def main():
     DOCKER_THREAD.run()
     COMMMUNICATION_THREAD.run()
     SOCKET_THREAD.run()
+
+    start_frontend()
 
     while True:
         try:

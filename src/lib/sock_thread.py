@@ -22,7 +22,7 @@ if (CONFIG_JSON["os"] == "Linux"):
     SOCK_PATH = "./resources/sock"
 
 class sock_thread(ez_thread):
-    def __init__(self, target:Callable=None, address:tuple[str, int]=None, target_address:tuple[str, int]=None, terminate_signal:Event=None, name:str="thread"):
+    def __init__(self, target:Callable=None, init:Callable=None, address:tuple[str, int]=None, target_address:tuple[str, int]=None, terminate_signal:Event=None, name:str="thread", sleeptime:float=0.0):
         if (not address):
             raise Exception("Socket thread needs an address to bind to")
 
@@ -33,7 +33,7 @@ class sock_thread(ez_thread):
 
         self.socket.settimeout(0.25)
 
-        super().__init__(target, None, terminate_signal, name, None, 0.0)
+        super().__init__(target, init, terminate_signal, name, None, sleeptime)
 
     def send(self, data:str, code:int=200, target:tuple[str, int]=None):
         target_address = target or self.target_address

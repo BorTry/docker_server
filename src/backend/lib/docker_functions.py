@@ -85,28 +85,34 @@ def get_container_stats(server_name):
     return stats
 
 def get_cpu_percentage(stats):
-    # Calculate deltas between current and previous stats
-    cpu_delta = stats["cpu_stats"]["cpu_usage"]["total_usage"] - \
-                stats["precpu_stats"]["cpu_usage"]["total_usage"]
-    system_delta = stats["cpu_stats"]["system_cpu_usage"] - \
-                   stats["precpu_stats"]["system_cpu_usage"]
+    try:
+        # Calculate deltas between current and previous stats
+        cpu_delta = stats["cpu_stats"]["cpu_usage"]["total_usage"] - \
+                    stats["precpu_stats"]["cpu_usage"]["total_usage"]
+        system_delta = stats["cpu_stats"]["system_cpu_usage"] - \
+                    stats["precpu_stats"]["system_cpu_usage"]
+        
+        # Get number of CPU cores to normalize percentage (for values > 100%)
+        online_cpus = stats["cpu_stats"].get("online_cpus", 
+                    len(stats["cpu_stats"]["cpu_usage"].get("percpu_usage", [])))
     
-    # Get number of CPU cores to normalize percentage (for values > 100%)
-    online_cpus = stats["cpu_stats"].get("online_cpus", 
-                   len(stats["cpu_stats"]["cpu_usage"].get("percpu_usage", [])))
-    
-    if system_delta > 0.0 and cpu_delta > 0.0:
-        return round((cpu_delta / system_delta) * online_cpus * 100.0)
-    return 0.0
+        if system_delta > 0.0 and cpu_delta > 0.0:
+            return round((cpu_delta / system_delta) * online_cpus * 100.0)
+        return 0.0
+    except:
+        return 0
 
 def get_container_ramusage(stats):
-    mem_usage = stats["memory_stats"]["usage"]
-    # Subtract cache to get precise active memory (varies by cgroup version)
-    cache = stats["memory_stats"]["stats"].get("inactive_file", 0) 
-    used_memory = mem_usage - cache
-    limit = stats["memory_stats"]["limit"]
+    try:
+        mem_usage = stats["memory_stats"]["usage"]
+        # Subtract cache to get precise active memory (varies by cgroup version)
+        cache = stats["memory_stats"]["stats"].get("inactive_file", 0) 
+        used_memory = mem_usage - cache
+        limit = stats["memory_stats"]["limit"]
 
-    return round((used_memory / limit) * 100) # out of 100
+        return round((used_memory / limit) * 100) # out of 100
+    except:
+        return 0
 
 # ============================ Container manipulation ============================
 
@@ -117,6 +123,14 @@ def stop_frontend():
     
     frontend = CLIENT.containers.get("docker_server-frontend-1")
     frontend.stop()
+
+def start_frontend(): 
+    # check to see if the docker container exists at all
+    if (not len(CLIENT.containers.list(filters={"name": "docker_server-frontend-1"}, all=True))):
+        raise Exception("Front end container does not exist")
+    
+    frontend = CLIENT.containers.get("docker_server-frontend-1")
+    frontend.start()
 
 def stop_server(server_name):
     container_name = convert_server_name(server_name)

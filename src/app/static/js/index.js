@@ -17,8 +17,10 @@ async function build_server_list() {
         return response.json()
     })
 
+    console.log(data.message.servers)
+
     // contains launch options for each server
-    let all_servers = extract_data(data.message).data
+    let all_servers = extract_data(data.message)
 
     if (!all_servers.servers.length) {
         return
@@ -41,18 +43,10 @@ async function change_live_servers() {
         return response.json()
     })
 
-    let all_servers = extract_data(data.message).data
-
-    if (!all_servers) return
-
-    // update the ram and cpu gauges for each server
-    for (let usage of all_servers) {
-        update_gauge(`cpu-gauge-${usage.name}`, usage.cpu)
-        update_gauge(`ram-gauge-${usage.name}`, usage.ram)
-    }
+    let all_servers = extract_data(data.message)
 
     // turn all server-listing red if none are running
-    if (!all_servers.length) {
+    if (!all_servers) {
         if (!RUNNING_SERVERS.length) return
 
         for (let server_name of RUNNING_SERVERS) {
@@ -61,6 +55,12 @@ async function change_live_servers() {
             update_gauge(`ram-gauge-${server_name}`, 0)
         }
         return
+    }
+
+    // update the ram and cpu gauges for each server
+    for (let usage of all_servers) {
+        update_gauge(`cpu-gauge-${usage.name}`, usage.cpu)
+        update_gauge(`ram-gauge-${usage.name}`, usage.ram)
     }
 
     // turn "all server" items green if none are recorded as running
@@ -110,6 +110,7 @@ function change_server_status(name, online=true) {
 
 function extract_data(response) {
     // flip the order of " and ' ...
+    return response
     return JSON.parse(response)
 }
 

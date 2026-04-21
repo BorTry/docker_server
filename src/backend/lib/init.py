@@ -39,20 +39,11 @@ def fill_config():
     with open(CONFIG_FILE_PATH, "w") as file:
         file.write(dumps(json_obj, indent=4))
 
-def start_frontend(): 
-    # check to see if the docker container exists at all
-    if (not len(CLIENT.containers.list(filters={"name": "docker_server-frontend-1"}, all=True))):
-        raise Exception("Front end container does not exist")
-    
-    frontend = CLIENT.containers.get("docker_server-frontend-1")
-    frontend.start()
-
 def start():
     if (not docker_running()):
         raise Exception("Docker engine is not running")
     
     initialize_servers_json()
     fill_config()
-    start_frontend()
 
 start()

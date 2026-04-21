@@ -17,6 +17,7 @@ class ez_thread:
 
         self.thread = Thread(target=thread_wrapper(self, target), name=name)
         self.terminate_signal = terminate_signal or Event()
+        self.return_val = None
 
         self.pipe = pipe
 
@@ -54,8 +55,10 @@ class ez_thread:
             self.thread.join()
 
     def run(self):
+        self.print(f"Starting {self.name}")
         if (self.init):
             self.init(self)
+        self.print(f"{self.name} has been initialized")
 
         self.thread.start()
 
