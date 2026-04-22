@@ -13,7 +13,12 @@ function create_gauge(gauge_id, text) {
     let gauge_foreground = document.createElement("div")
     gauge_foreground.className = "gauge-foreground"
 
-    gauge_foreground.innerText = text
+    let gauge_text = document.createElement("p")
+    gauge_text.innerText = text
+    gauge_text.style.textAlign = "center"
+    gauge_text.style.fontWeight = "bold"
+
+    gauge_foreground.appendChild(gauge_text)
 
     let gauge_border = document.createElement("div")
     gauge_border.className = "gauge-border inset-shadow"

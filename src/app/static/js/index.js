@@ -116,6 +116,7 @@ function extract_data(response) {
 
 async function main() {
     await build_server_list()
+    await change_live_servers()
 }
 
 main()

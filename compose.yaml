@@ -45,13 +45,19 @@ services:
   factorio:
     build:
       context: ./buildfiles
-      dockerfile: Dockerfile.java
+      dockerfile: Dockerfile.factorio
+    user: "factorio:factorio"
+    command: "/opt/factorio/bin/x64/factorio --start-server opt/saves/my-save.zip"
+    ports:
+      - "34197:34197/udp"
     tty: true
 
   factorio_space_age:
     build:
       context: ./buildfiles
-      dockerfile: Dockerfile.java
+      dockerfile: Dockerfile.ubuntu
+    ports:
+      - "34197:34197"
     tty: true
 
   satisfactory:
