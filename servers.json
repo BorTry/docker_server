@@ -53,25 +53,5 @@
                 ]
             }
         ]
-    },
-    "container_to_server_names": {
-        "minecraft": "Minecraft",
-        "minecraft_modded": "Modded Minecraft",
-        "space_engineers": "Space Engineers",
-        "factorio": "Factorio",
-        "factorio_space_age": "Factorio Space Age",
-        "screeps": "Screeps",
-        "satisfactory": "Satisfactory",
-        "astroneers": "Astroneers"
-    },
-    "server_names_to_container": {
-        "Minecraft": "minecraft",
-        "Modded Minecraft": "minecraft_modded",
-        "Space Engineers": "space_engineers",
-        "Factorio": "factorio",
-        "Factorio Space Age": "factorio_space_age",
-        "Screeps": "screeps",
-        "Satisfactory": "satisfactory",
-        "Astroneers": "astroneers"
     }
 }
