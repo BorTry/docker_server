@@ -7,6 +7,8 @@ from typing import Callable, Any
 from multiprocessing.connection import Connection
 
 class ez_thread:
+    __slots__ = ("name", "stdout", "sleep_time", "thread", "terminate_signal", "return_val", "pipe", "init")
+
     def __init__(self, target:Callable=None, init:Callable=None, terminate_signal:Event=None, name="thread", pipe:Connection=None, sleep_time:float=0.1):
         self.name = name
         self.stdout = stdout

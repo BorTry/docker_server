@@ -22,6 +22,8 @@ if (CONFIG_JSON["os"] == "Linux"):
     SOCK_PATH = "./resources/sock"
 
 class sock_thread(ez_thread):
+    __slots__ = ("target_address", "socket")
+
     def __init__(self, target:Callable=None, init:Callable=None, address:tuple[str, int]=None, target_address:tuple[str, int]=None, terminate_signal:Event=None, name:str="thread", sleeptime:float=0.0):
         if (not address):
             raise Exception("Socket thread needs an address to bind to")
