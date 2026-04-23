@@ -1,1 +1,1 @@
-python -m src.backend.server2
+python -m src.backend.server

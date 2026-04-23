@@ -1,93 +1,74 @@
-"""
-Handles requests from the front end server. ensures that there is enough space for the request to be completed.
-Serves the front end with information needed to run.
-"""
-
-# TODO: Split the main thread into two thread
-# one handles requests from the frontend server
-# the other handles everything about the containers
-# between them is a pipe for data transfer
-
-import lib.init
-
+from threading import Event
+from multiprocessing import Pipe
 from time import sleep
-from ..lib.communication import communication
-from ..lib.server_codes import Server_codes
-from socket import socket, timeout
-from .lib.docker_functions import *
-from json import load, loads
+from runpy import run_path
 
-SERVER_ADDRESS = ("0.0.0.0", 2024)
-SERVER_JSON = None
+from src.lib.ez_thread import ez_thread
+from src.lib.sock_thread import sock_thread
+from src.backend.lib.comm_thread import comm_func, comm_init, socket_func
+from src.backend.lib.docker_thread import docker_func, docker_init
+from src.backend.lib.docker_functions import stop_frontend, start_frontend
 
-# Get server information from json file
-with open("./servers.json", "r") as file:
-    SERVER_JSON = load(file)
+run_path("./src/backend/lib/init.py") # Init file
 
-server_socket = communication(SERVER_ADDRESS)
+thread_pipe_1, thread_pipe_2 = Pipe(duplex=True)
+thread_terminate_event = Event()
 
-def wrap(com:communication, socket:socket):
-    try:
-        bdata, address = socket.recvfrom(1024)
-        
-        data = extract_data(bdata.decode("utf-8"))
-        proc_data = process_data(data)
+COMMMUNICATION_THREAD = ez_thread(
+    target=comm_func,
+    init=comm_init,
+    terminate_signal=thread_terminate_event,
+    name="comm_thread",
+    pipe=thread_pipe_1,
+) # Facilitates communication between the two threads
 
-        if (proc_data == None):
-            return
+DOCKER_THREAD = ez_thread(
+    target=docker_func,
+    init=docker_init,
+    terminate_signal=thread_terminate_event,
+    name="docker_thread",
+    pipe=thread_pipe_2,
+    sleep_time=1.0
+) # Talks to the docker engine
 
-        com.send(proc_data, address)
+PORT = 2024
+ADDRESS = "0.0.0.0"
 
-    except timeout:
-        pass
+SOCKET_THREAD = sock_thread(
+    target=socket_func,
+    address=(ADDRESS, PORT),
+    terminate_signal=thread_terminate_event,
+    name="socket_thread"
+) # Talks to the frontend
 
-def process_data(data:dict):
-    if (not docker_running):
-        print("DOCKER IS NOT RUNNING")
-        return Server_codes.ENGINE_NOT_RUNNING
-
-    match data["code"]:
-        case Server_codes.SERVER_COUNT:
-            return get_container_count()
-
-        case Server_codes.RUNNING_SERVERS:
-            # find the resource use for each container
-            all_containers = filter_container_names(get_container_names(), SERVER_JSON)
-            resources_used = get_resource_use_for_containers(all_containers, SERVER_JSON)
-
-            return resources_used
-        case Server_codes.ALL_SERVERS:
-            return {
-                    "servers": SERVER_JSON["server_names"],
-                    "launch_options": SERVER_JSON["launch_alternatives"]
-                }
-
-        case Server_codes.START_SERVER:
-            start_server(data["data"], SERVER_JSON)
-
-        case Server_codes.GET_SERVER_USAGE:
-            get_container_ramusage(data["data"], SERVER_JSON)
-
-def extract_data(response:str):
-    return loads(response)
+# The docker thread must be started before the com thread
 
 def main():
-    server_socket.start(wrap)
+    DOCKER_THREAD.run()
+    COMMMUNICATION_THREAD.run()
+    SOCKET_THREAD.run()
+
+    start_frontend()
 
     while True:
         try:
-            user_in = input("Select Action: ")
+            user_in = input("Select Action: \n")
 
             if (user_in == "quit" or user_in == "q"):
-                return
+                break
 
-            sleep(1)
-            
         except Exception as e:
             print(e)
 
+    thread_terminate_event.set()
+
+    sleep(1)
+
+    stop_frontend()
+
+    DOCKER_THREAD.terminate()
+    COMMMUNICATION_THREAD.terminate()
+    SOCKET_THREAD.terminate()
+
 if __name__ == "__main__":
     main()
-    print("Cleaning shit up")
-    stop_frontend()
-    server_socket.stop()
